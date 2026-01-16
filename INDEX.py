@@ -1,7 +1,6 @@
-# ================== IMPORTS (MUST BE FIRST) ==================
+# ================== IMPORTS ==================
 import streamlit as st
 import requests
-import json
 import time
 
 # ================== PAGE CONFIG ==================
@@ -16,33 +15,21 @@ API_KEY = "AIzaSyBMJ9pCw3CqMjlFtP_tVCj1jJNanTfnvdI"
 MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
 
 # ================== POPUP STATE ==================
-if "show_popup" not in st.session_state:
-    st.session_state.show_popup = True
+if "popup_state" not in st.session_state:
+    st.session_state.popup_state = "open"  
+    # states: open | minimized | closed
 
-# ================== CUSTOM STYLES ==================
+# ================== STYLES ==================
 st.markdown("""
 <style>
 .main { background-color: #050505; color: white; }
-
-.stButton>button {
-    width: 100%;
-    border-radius: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-h1, h2, h3 {
-    font-family: 'Inter', sans-serif;
-    font-weight: 900 !important;
-}
-
 .yellow-text { color: #EAB308; }
 
 /* Popup overlay */
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.95);
+    background: rgba(0,0,0,0.85);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -59,39 +46,69 @@ h1, h2, h3 {
     max-width: 600px;
 }
 
-/* Close button */
-.close-btn {
+/* Popup controls */
+.popup-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Minimized bar */
+.minimized-bar {
     position: fixed;
-    top: 20px;
-    right: 30px;
-    z-index: 10000;
+    bottom: 20px;
+    right: 20px;
+    background: #111;
+    border: 2px solid #EAB308;
+    padding: 10px 16px;
+    border-radius: 16px;
+    z-index: 9999;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ================== POPUP ==================
-if st.session_state.show_popup:
+# ================== POPUP OPEN ==================
+if st.session_state.popup_state == "open":
 
     st.markdown("""
     <div class="overlay">
         <div class="popup-box">
+            <div class="popup-controls">
+                <span style="color:#888;">_</span>
+            </div>
             <h1 style="color:#EAB308;">🚧</h1>
-            <h1>The Site Is Under Construction</h1>
+            <h2>This Site Is Under Construction</h2>
             <p style="color:#888;">
-                We are currently polishing the portal to ensure the best study experience.
+                We are currently polishing the portal.
+                You can continue exploring the site.
             </p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ❌ Close Button
-    st.markdown('<div class="close-btn">', unsafe_allow_html=True)
-    if st.button("❌ Close"):
-        st.session_state.show_popup = False
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([2, 2, 2])
+    with col1:
+        if st.button("➖ Minimize"):
+            st.session_state.popup_state = "minimized"
+            st.rerun()
 
-    st.stop()
+    with col3:
+        if st.button("❌ Close"):
+            st.session_state.popup_state = "closed"
+            st.rerun()
+
+# ================== POPUP MINIMIZED ==================
+elif st.session_state.popup_state == "minimized":
+
+    st.markdown("""
+    <div class="minimized-bar">
+        🚧 Site Under Construction
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("🔼 Restore"):
+        st.session_state.popup_state = "open"
+        st.rerun()
 
 # ================== AI FUNCTION ==================
 def call_ai(prompt, system_prompt="You are Scholar Aedan, a helpful mentor for students under 18."):
@@ -107,12 +124,12 @@ def call_ai(prompt, system_prompt="You are Scholar Aedan, a helpful mentor for s
             response = requests.post(MODEL_URL, json=payload, timeout=10)
             data = response.json()
             if "error" in data:
-                return f"API Error: {data['error']['message']}"
+                return data["error"]["message"]
             return data["candidates"][0]["content"]["parts"][0]["text"]
         except:
             time.sleep(delay)
 
-    return "Connection error. Please check your internet."
+    return "Connection error."
 
 # ================== SIDEBAR ==================
 st.sidebar.title("KVS Scholars")
@@ -133,9 +150,9 @@ if menu == "📚 Textbook Library":
     )
 
     if st.button("GET NCERT PDF"):
-        query = f"NCERT {grade} {subject} official textbook PDF"
+        query = f"NCERT {grade} {subject} PDF"
         st.markdown(
-            f"[Click here to search on Google](https://www.google.com/search?q={query.replace(' ', '+')})"
+            f"[Search on Google](https://www.google.com/search?q={query.replace(' ', '+')})"
         )
 
 # ================== PAPER GENERATOR ==================
@@ -146,9 +163,9 @@ elif menu == "📝 Paper Gen":
     p_sub = st.selectbox("Subject", ["Mathematics", "Science", "English"])
     chapters = st.text_area("Chapters", "Chapter 1, Chapter 2")
 
-    if st.button("GENERATE"):
+    if st.button("Generate"):
         with st.spinner("Generating..."):
-            st.write(call_ai(f"Create a question paper for {p_grade} {p_sub} from {chapters}"))
+            st.write(call_ai(f"Create a paper for {p_grade} {p_sub} from {chapters}"))
 
 # ================== VIDEO MENTOR ==================
 elif menu == "🎥 Video Mentor":
@@ -156,7 +173,7 @@ elif menu == "🎥 Video Mentor":
 
     topic = st.text_input("Topic")
     if topic:
-        st.markdown(call_ai(f"Suggest good NCERT-aligned YouTube videos for {topic}"))
+        st.write(call_ai(f"Suggest NCERT-aligned videos for {topic}"))
 
 # ================== CHAT ==================
 elif menu == "💬 Chat with Aedan":
@@ -176,4 +193,4 @@ elif menu == "💬 Chat with Aedan":
 
 # ================== FOOTER ==================
 st.sidebar.markdown("---")
-st.sidebar.caption("KVS Scholars Portal v2.0")
+st.sidebar.caption("KVS Scholars Portal v2.1")
