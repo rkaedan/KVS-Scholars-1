@@ -44,12 +44,14 @@ st.markdown("""
         border-radius: 24px;
         box-shadow: 0 0 30px rgba(234, 179, 8, 0.2);
         max-width: 600px;
+        margin-bottom: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- Under Construction Pop-up Logic ---
 if st.session_state.show_popup:
+    # We wrap the HTML and the button in a container to ensure the button is clickable
     st.markdown("""
         <div class="overlay">
             <div class="popup-box">
@@ -60,13 +62,16 @@ if st.session_state.show_popup:
         </div>
     """, unsafe_allow_html=True)
     
-    # Button to dismiss the pop-up
-    # Note: Using columns to center the Streamlit button widget
+    # Place the Streamlit button within a centered column layout
+    # This button sits "above" the fixed overlay due to Streamlit's rendering order
     _, btn_col, _ = st.columns([2, 1, 2])
     with btn_col:
+        st.markdown('<div style="position: relative; z-index: 10000;">', unsafe_allow_html=True)
         if st.button("OK"):
             st.session_state.show_popup = False
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+        
     st.stop() # Prevents the rest of the app from loading until "OK" is clicked
 
 # --- AI Integration Logic ---
