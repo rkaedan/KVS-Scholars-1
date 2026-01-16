@@ -42,12 +42,12 @@ def call_ai(prompt, system_prompt="You are Scholar Aedan, a helpful mentor for s
 
 # --- Sidebar / Navigation ---
 st.sidebar.title("KVS Scholars")
-menu = st.sidebar.radio("Navigation", ["📚 Library", "📝 Paper Gen", "🎥 Video Mentor", "💬 Chat with Aedan"])
+menu = st.sidebar.radio("Navigation", ["📚 Textbook Library", "📝 Paper Gen", "🎥 Video Mentor", "💬 Chat with Aedan"])
 
 # --- App Logic ---
 
 if menu == "📚 Library":
-    st.markdown("# The <span class='yellow-text'>Library.</span>", unsafe_allow_html=True)
+    st.markdown("# The <span class='yellow-text'>Textbook Library.</span>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     
     with col1:
