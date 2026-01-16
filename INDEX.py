@@ -15,9 +15,14 @@ API_KEY = "AIzaSyBMJ9pCw3CqMjlFtP_tVCj1jJNanTfnvdI"
 MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
 
 # ================== POPUP STATE ==================
-if "popup_state" not in st.session_state:
-    st.session_state.popup_state = "open"  
-    # states: open | minimized | closed
+if "show_popup" not in st.session_state:
+    st.session_state.show_popup = True
+    st.session_state.popup_start_time = time.time()
+
+# Auto-hide after 5 seconds
+if st.session_state.show_popup:
+    if time.time() - st.session_state.popup_start_time >= 5:
+        st.session_state.show_popup = False
 
 # ================== STYLES ==================
 st.markdown("""
@@ -46,69 +51,45 @@ st.markdown("""
     max-width: 600px;
 }
 
-/* Popup controls */
-.popup-controls {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-/* Minimized bar */
-.minimized-bar {
+/* Close button */
+.close-btn {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #111;
-    border: 2px solid #EAB308;
-    padding: 10px 16px;
-    border-radius: 16px;
-    z-index: 9999;
+    top: 20px;
+    right: 30px;
+    z-index: 10000;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ================== POPUP OPEN ==================
-if st.session_state.popup_state == "open":
+# ================== POPUP ==================
+if st.session_state.show_popup:
 
     st.markdown("""
     <div class="overlay">
         <div class="popup-box">
-            <div class="popup-controls">
-                <span style="color:#888;">_</span>
-            </div>
             <h1 style="color:#EAB308;">🚧</h1>
             <h2>This Site Is Under Construction</h2>
             <p style="color:#888;">
-                We are currently polishing the portal.
-                You can continue exploring the site.
+                We are currently polishing the portal.<br>
+                This message will disappear automatically.
+            </p>
+            <p style="color:#666; font-size: 0.9rem;">
+                ⏳ Closing in 5 seconds...
             </p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([2, 2, 2])
-    with col1:
-        if st.button("➖ Minimize"):
-            st.session_state.popup_state = "minimized"
-            st.rerun()
-
-    with col3:
-        if st.button("❌ Close"):
-            st.session_state.popup_state = "closed"
-            st.rerun()
-
-# ================== POPUP MINIMIZED ==================
-elif st.session_state.popup_state == "minimized":
-
-    st.markdown("""
-    <div class="minimized-bar">
-        🚧 Site Under Construction
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("🔼 Restore"):
-        st.session_state.popup_state = "open"
+    # Manual close option
+    st.markdown('<div class="close-btn">', unsafe_allow_html=True)
+    if st.button("❌ Close"):
+        st.session_state.show_popup = False
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Keep checking timer
+    time.sleep(0.2)
+    st.rerun()
 
 # ================== AI FUNCTION ==================
 def call_ai(prompt, system_prompt="You are Scholar Aedan, a helpful mentor for students under 18."):
@@ -193,4 +174,4 @@ elif menu == "💬 Chat with Aedan":
 
 # ================== FOOTER ==================
 st.sidebar.markdown("---")
-st.sidebar.caption("KVS Scholars Portal v2.1")
+st.sidebar.caption("KVS Scholars Portal v2.2")
