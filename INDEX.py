@@ -1,4 +1,4 @@
-# ================== IMPORTS (MUST BE AT TOP) ==================
+# ================== IMPORTS (MUST BE FIRST) ==================
 import streamlit as st
 import requests
 import json
@@ -23,16 +23,19 @@ if "show_popup" not in st.session_state:
 st.markdown("""
 <style>
 .main { background-color: #050505; color: white; }
+
 .stButton>button {
     width: 100%;
     border-radius: 12px;
     font-weight: bold;
     text-transform: uppercase;
 }
+
 h1, h2, h3 {
     font-family: 'Inter', sans-serif;
     font-weight: 900 !important;
 }
+
 .yellow-text { color: #EAB308; }
 
 /* Popup overlay */
@@ -45,6 +48,8 @@ h1, h2, h3 {
     align-items: center;
     justify-content: center;
 }
+
+/* Popup box */
 .popup-box {
     background: #111;
     padding: 40px;
@@ -52,6 +57,14 @@ h1, h2, h3 {
     border-radius: 24px;
     text-align: center;
     max-width: 600px;
+}
+
+/* Close button */
+.close-btn {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    z-index: 10000;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -71,11 +84,12 @@ if st.session_state.show_popup:
     </div>
     """, unsafe_allow_html=True)
 
-    _, col, _ = st.columns([4, 2, 4])
-    with col:
-        if st.button("OK"):
-            st.session_state.show_popup = False
-            st.rerun()
+    # ❌ Close Button
+    st.markdown('<div class="close-btn">', unsafe_allow_html=True)
+    if st.button("❌ Close"):
+        st.session_state.show_popup = False
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     st.stop()
 
@@ -98,7 +112,7 @@ def call_ai(prompt, system_prompt="You are Scholar Aedan, a helpful mentor for s
         except:
             time.sleep(delay)
 
-    return "Connection error."
+    return "Connection error. Please check your internet."
 
 # ================== SIDEBAR ==================
 st.sidebar.title("KVS Scholars")
@@ -107,7 +121,7 @@ menu = st.sidebar.radio(
     ["📚 Textbook Library", "📝 Paper Gen", "🎥 Video Mentor", "💬 Chat with Aedan"]
 )
 
-# ================== TEXTBOOK ==================
+# ================== TEXTBOOK LIBRARY ==================
 if menu == "📚 Textbook Library":
     st.markdown("# The <span class='yellow-text'>Textbook Library</span>", unsafe_allow_html=True)
 
@@ -130,7 +144,6 @@ elif menu == "📝 Paper Gen":
 
     p_grade = st.selectbox("Class", [f"Class {i}" for i in range(6, 13)])
     p_sub = st.selectbox("Subject", ["Mathematics", "Science", "English"])
-
     chapters = st.text_area("Chapters", "Chapter 1, Chapter 2")
 
     if st.button("GENERATE"):
