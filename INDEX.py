@@ -46,7 +46,7 @@ menu = st.sidebar.radio("Navigation", ["📚 Textbook Library", "📝 Paper Gen"
 
 # --- App Logic ---
 
-if menu == "📚 Library":
+if menu == "📚 Textbook Library":
     st.markdown("# The <span class='yellow-text'>Textbook Library.</span>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     
