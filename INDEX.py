@@ -9,6 +9,10 @@ MODEL_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5
 
 st.set_page_config(page_title="KVS Scholars Portal", page_icon="✨", layout="wide")
 
+# --- Pop-up State Management ---
+if "show_popup" not in st.session_state:
+    st.session_state.show_popup = True
+
 # --- Custom Styling ---
 st.markdown("""
     <style>
@@ -17,8 +21,53 @@ st.markdown("""
     .stSelectbox, .stTextArea, .stTextInput { background-color: #111 !important; }
     h1, h2, h3 { font-family: 'Inter', sans-serif; font-weight: 900 !important; }
     .yellow-text { color: #EAB308; }
+    
+    /* Overlay styling for the pop-up */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .popup-box {
+        background-color: #111;
+        padding: 50px;
+        border: 2px solid #EAB308;
+        border-radius: 24px;
+        box-shadow: 0 0 30px rgba(234, 179, 8, 0.2);
+        max-width: 600px;
+    }
     </style>
     """, unsafe_allow_html=True)
+
+# --- Under Construction Pop-up Logic ---
+if st.session_state.show_popup:
+    st.markdown("""
+        <div class="overlay">
+            <div class="popup-box">
+                <h1 style="color: #EAB308; font-size: 3rem; margin-bottom: 10px;">🚧</h1>
+                <h1 style="color: white; margin-bottom: 20px;">The Site Is Under Construction</h1>
+                <p style="color: #888; margin-bottom: 30px;">We are currently polishing the portal to ensure you have the best study experience. Feel free to explore the preview!</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Button to dismiss the pop-up
+    # Note: Using columns to center the Streamlit button widget
+    _, btn_col, _ = st.columns([2, 1, 2])
+    with btn_col:
+        if st.button("OK"):
+            st.session_state.show_popup = False
+            st.rerun()
+    st.stop() # Prevents the rest of the app from loading until "OK" is clicked
 
 # --- AI Integration Logic ---
 def call_ai(prompt, system_prompt="You are Scholar Aedan, a helpful mentor for students under 18. Provide safe, encouraging, clean, and educational content strictly following NCERT standards."):
